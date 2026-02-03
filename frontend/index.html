@@ -1,0 +1,910 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FCC Fake News Detector</title>
+    
+    <style>
+        /* ============================================================
+           VARIABLES ET RESET
+           ============================================================ */
+        
+        :root {
+            --primary-color: #2563eb;
+            --primary-dark: #1e40af;
+            --success-color: #10b981;
+            --danger-color: #ef4444;
+            --warning-color: #f59e0b;
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --text-color: #1e293b;
+            --text-light: #64748b;
+            --border-color: #e2e8f0;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        /* ============================================================
+           HEADER
+           ============================================================ */
+        
+        header {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 30px 0;
+            box-shadow: var(--shadow-lg);
+        }
+        
+        header .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        
+        .logo h1 {
+            font-size: 2rem;
+            margin-bottom: 5px;
+        }
+        
+        .subtitle {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+        
+        .stats {
+            display: flex;
+            gap: 30px;
+        }
+        
+        .stat-item {
+            text-align: center;
+        }
+        
+        .stat-value {
+            display: block;
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+        
+        .stat-label {
+            display: block;
+            font-size: 0.85rem;
+            opacity: 0.9;
+        }
+        
+        /* ============================================================
+           HERO SECTION
+           ============================================================ */
+        
+        .hero {
+            text-align: center;
+            padding: 60px 20px 40px;
+        }
+        
+        .hero h2 {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+            color: var(--text-color);
+        }
+        
+        .hero p {
+            font-size: 1.1rem;
+            color: var(--text-light);
+            max-width: 700px;
+            margin: 0 auto;
+        }
+        
+        /* ============================================================
+           FORM ELEMENTS
+           ============================================================ */
+        
+        .analysis-section {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 30px;
+            margin-bottom: 50px;
+        }
+        
+        .form-card,
+        .results-card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: var(--shadow);
+        }
+        
+        .form-card h3,
+        .results-card h3 {
+            margin-bottom: 20px;
+            color: var(--text-color);
+        }
+        
+        textarea {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 1rem;
+            font-family: inherit;
+            resize: vertical;
+            transition: border-color 0.3s;
+        }
+        
+        textarea:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+        
+        .quick-examples {
+            margin: 20px 0;
+            padding: 15px;
+            background: var(--bg-color);
+            border-radius: 8px;
+        }
+        
+        .examples-label {
+            font-size: 0.9rem;
+            color: var(--text-light);
+            margin-bottom: 10px;
+        }
+        
+        .example-btn {
+            padding: 8px 15px;
+            margin: 5px;
+            background: white;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.3s;
+        }
+        
+        .example-btn:hover {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+        
+        /* ============================================================
+           BUTTONS
+           ============================================================ */
+        
+        .button-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .btn-primary {
+            background: var(--primary-color);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+        
+        .btn-secondary {
+            background: var(--bg-color);
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
+        }
+        
+        .btn-secondary:hover {
+            background: var(--border-color);
+        }
+        
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        /* ============================================================
+           LOADING
+           ============================================================ */
+        
+        .loading {
+            text-align: center;
+            padding: 30px;
+        }
+        
+        .spinner {
+            width: 50px;
+            height: 50px;
+            margin: 0 auto 15px;
+            border: 4px solid var(--border-color);
+            border-top-color: var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        /* ============================================================
+           RESULTS
+           ============================================================ */
+        
+        .result-main {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            padding: 25px;
+            background: var(--bg-color);
+            border-radius: 12px;
+            margin-bottom: 25px;
+        }
+        
+        .prediction-icon {
+            font-size: 4rem;
+            animation: fadeInScale 0.5s ease-out;
+        }
+        
+        @keyframes fadeInScale {
+            from {
+                opacity: 0;
+                transform: scale(0.5);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+        
+        .result-content {
+            flex: 1;
+        }
+        
+        .prediction-label {
+            font-size: 1.8rem;
+            margin-bottom: 5px;
+        }
+        
+        .confidence-text {
+            font-size: 1.1rem;
+            color: var(--text-light);
+        }
+        
+        /* ============================================================
+           PROBABILITIES
+           ============================================================ */
+        
+        .probabilities {
+            margin: 25px 0;
+        }
+        
+        .probability-item {
+            margin-bottom: 20px;
+        }
+        
+        .probability-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+        
+        .probability-bar {
+            height: 24px;
+            background: var(--bg-color);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        
+        .probability-fill {
+            height: 100%;
+            transition: width 1s ease-out;
+            border-radius: 12px;
+        }
+        
+        .probability-fill.fake {
+            background: linear-gradient(90deg, var(--danger-color), #dc2626);
+        }
+        
+        .probability-fill.reliable {
+            background: linear-gradient(90deg, var(--success-color), #059669);
+        }
+        
+        /* ============================================================
+           RESULT DETAILS
+           ============================================================ */
+        
+        .result-details {
+            margin: 25px 0;
+            padding: 20px;
+            background: var(--bg-color);
+            border-radius: 8px;
+        }
+        
+        .detail-item {
+            margin-bottom: 15px;
+        }
+        
+        .detail-label {
+            display: block;
+            font-size: 0.9rem;
+            color: var(--text-light);
+            margin-bottom: 5px;
+        }
+        
+        .detail-value {
+            font-weight: 600;
+        }
+        
+        .text-preview {
+            font-style: italic;
+            color: var(--text-light);
+            margin-top: 5px;
+        }
+        
+        /* ============================================================
+           INFO SECTION
+           ============================================================ */
+        
+        .info-section {
+            margin-bottom: 50px;
+        }
+        
+        .info-card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: var(--shadow);
+        }
+        
+        .steps {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 25px;
+            margin-top: 25px;
+        }
+        
+        .step {
+            text-align: center;
+            padding: 20px;
+            background: var(--bg-color);
+            border-radius: 8px;
+            transition: transform 0.3s;
+        }
+        
+        .step:hover {
+            transform: translateY(-5px);
+        }
+        
+        .step-number {
+            width: 50px;
+            height: 50px;
+            margin: 0 auto 15px;
+            background: var(--primary-color);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+        
+        .step h4 {
+            margin-bottom: 10px;
+            color: var(--text-color);
+        }
+        
+        .step p {
+            color: var(--text-light);
+            font-size: 0.95rem;
+        }
+        
+        /* ============================================================
+           FOOTER
+           ============================================================ */
+        
+        footer {
+            background: var(--text-color);
+            color: white;
+            text-align: center;
+            padding: 30px 20px;
+            margin-top: 50px;
+        }
+        
+        footer p {
+            margin: 5px 0;
+            opacity: 0.9;
+        }
+        
+        /* ============================================================
+           ANIMATIONS
+           ============================================================ */
+        
+        @keyframes slideIn {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        @keyframes slideOut {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+        }
+        
+        /* ============================================================
+           RESPONSIVE
+           ============================================================ */
+        
+        @media (max-width: 768px) {
+            header .container {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .stats {
+                margin-top: 20px;
+            }
+            
+            .hero h2 {
+                font-size: 1.8rem;
+            }
+            
+            .button-group {
+                flex-direction: column;
+            }
+            
+            .result-main {
+                flex-direction: column;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="container">
+            <div class="logo">
+                <h1>🛡️ FCC Fake News Detector</h1>
+                <p class="subtitle">Federal Communications Commission</p>
+            </div>
+            <div class="stats">
+                <div class="stat-item">
+                    <span class="stat-value">98.34%</span>
+                    <span class="stat-label">Précision</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-value">24,728</span>
+                    <span class="stat-label">Articles analysés</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container">
+        <!-- Hero Section -->
+        <section class="hero">
+            <h2>Détectez les Fake News en temps réel</h2>
+            <p>Utilisez notre modèle de Machine Learning entraîné sur des milliers d'articles pour identifier les fausses informations.</p>
+        </section>
+
+        <!-- Analysis Form -->
+        <section class="analysis-section">
+            <div class="form-card">
+                <h3>📰 Analyser un article</h3>
+                
+                <textarea 
+                    id="articleText" 
+                    placeholder="Collez votre article ici...&#10;&#10;Exemple : Breaking news: Scientists discover new breakthrough in medical research..."
+                    rows="8"
+                ></textarea>
+
+                <div class="quick-examples">
+                    <p class="examples-label">Exemples rapides :</p>
+                    <button class="example-btn" onclick="useExample(0)">📄 Article fiable</button>
+                    <button class="example-btn" onclick="useExample(1)">⚠️ Fake news</button>
+                    <button class="example-btn" onclick="useExample(2)">🧪 Clickbait</button>
+                </div>
+
+                <div class="button-group">
+                    <button id="analyzeBtn" class="btn btn-primary" onclick="analyzeArticle()">
+                        <span class="btn-icon">🔍</span>
+                        Analyser l'article
+                    </button>
+                    <button class="btn btn-secondary" onclick="clearText()">
+                        <span class="btn-icon">🗑️</span>
+                        Effacer
+                    </button>
+                </div>
+
+                <div id="loading" class="loading" style="display: none;">
+                    <div class="spinner"></div>
+                    <p>Analyse en cours...</p>
+                </div>
+            </div>
+
+            <!-- Results Section -->
+            <div id="results" class="results-card" style="display: none;">
+                <h3>📊 Résultats de l'analyse</h3>
+                
+                <div class="result-main">
+                    <div id="predictionIcon" class="prediction-icon"></div>
+                    <div class="result-content">
+                        <h4 id="predictionLabel" class="prediction-label"></h4>
+                        <p id="confidenceText" class="confidence-text"></p>
+                    </div>
+                </div>
+
+                <div class="probabilities">
+                    <div class="probability-item">
+                        <div class="probability-header">
+                            <span class="probability-label">🔴 Fake News</span>
+                            <span id="fakeProba" class="probability-value">0%</span>
+                        </div>
+                        <div class="probability-bar">
+                            <div id="fakeBar" class="probability-fill fake" style="width: 0%"></div>
+                        </div>
+                    </div>
+
+                    <div class="probability-item">
+                        <div class="probability-header">
+                            <span class="probability-label">✅ Reliable News</span>
+                            <span id="reliableProba" class="probability-value">0%</span>
+                        </div>
+                        <div class="probability-bar">
+                            <div id="reliableBar" class="probability-fill reliable" style="width: 0%"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="result-details">
+                    <div class="detail-item">
+                        <span class="detail-label">Longueur du texte</span>
+                        <span id="textLength" class="detail-value">0 caractères</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Aperçu</span>
+                        <p id="textPreview" class="text-preview"></p>
+                    </div>
+                </div>
+
+                <button class="btn btn-secondary" onclick="analyzeAnother()">
+                    Analyser un autre article
+                </button>
+            </div>
+        </section>
+
+        <!-- Info Section -->
+        <section class="info-section">
+            <div class="info-card">
+                <h3>🤖 Comment ça fonctionne ?</h3>
+                <div class="steps">
+                    <div class="step">
+                        <div class="step-number">1</div>
+                        <h4>Vectorisation</h4>
+                        <p>Le texte est transformé en vecteur TF-IDF avec 5000 features</p>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">2</div>
+                        <h4>Prédiction</h4>
+                        <p>Le modèle Logistic Regression analyse les patterns</p>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">3</div>
+                        <h4>Résultat</h4>
+                        <p>Classification avec score de confiance en temps réel</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <p>&copy; 2024 FCC Fake News Detector - Projet académique</p>
+            <p>Powered by Flask + scikit-learn + Logistic Regression</p>
+        </div>
+    </footer>
+
+    <script>
+        console.log('✅ JavaScript chargé !');
+        
+        /* ============================================================
+           CONFIGURATION
+           ============================================================ */
+        
+        const API_URL = 'http://localhost:5000/predict';
+        
+        // Exemples prédéfinis
+        const examples = [
+            {
+                text: "Scientists at Harvard Medical School have published a groundbreaking peer-reviewed study on cancer treatment. The research team, led by Dr. Johnson, conducted extensive clinical trials over five years with promising results. The findings were published in the Journal of Medical Research and have been validated by independent experts in the field.",
+                label: "Article fiable"
+            },
+            {
+                text: "SHOCKING!!! You won't believe what happened next! Doctors HATE this one simple trick! Click here NOW to discover the secret they don't want you to know! This will change your life FOREVER!!!",
+                label: "Fake news"
+            },
+            {
+                text: "BREAKING: UNBELIEVABLE discovery that Big Pharma doesn't want you to know! This miracle cure will SHOCK you! Scientists are STUNNED by these results! SHARE before it gets DELETED!!!",
+                label: "Clickbait suspect"
+            }
+        ];
+        
+        /* ============================================================
+           FONCTIONS PRINCIPALES
+           ============================================================ */
+        
+        function useExample(index) {
+            console.log('useExample appelé avec index:', index);
+            const example = examples[index];
+            document.getElementById('articleText').value = example.text;
+            showNotification(`Exemple chargé : ${example.label}`, 'info');
+        }
+        
+        function clearText() {
+            console.log('clearText appelé');
+            document.getElementById('articleText').value = '';
+            document.getElementById('results').style.display = 'none';
+        }
+        
+        function analyzeAnother() {
+            console.log('analyzeAnother appelé');
+            clearText();
+            document.getElementById('articleText').focus();
+        }
+        
+        async function analyzeArticle() {
+            console.log('🚀 analyzeArticle appelé !');
+            const text = document.getElementById('articleText').value.trim();
+            
+            // Validation
+            if (!text) {
+                showNotification('⚠️ Veuillez entrer un texte à analyser', 'warning');
+                return;
+            }
+            
+            if (text.length < 20) {
+                showNotification('⚠️ Le texte est trop court (minimum 20 caractères)', 'warning');
+                return;
+            }
+            
+            console.log('Texte à analyser:', text.substring(0, 50) + '...');
+            
+            // Désactiver le bouton et afficher le loading
+            const analyzeBtn = document.getElementById('analyzeBtn');
+            const loading = document.getElementById('loading');
+            const results = document.getElementById('results');
+            
+            analyzeBtn.disabled = true;
+            loading.style.display = 'block';
+            results.style.display = 'none';
+            
+            try {
+                console.log('Envoi de la requête à l\'API...');
+                
+                // Appel à l'API
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ text: text })
+                });
+                
+                console.log('Réponse reçue, status:', response.status);
+                
+                if (!response.ok) {
+                    throw new Error(`Erreur HTTP: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                console.log('Données reçues:', data);
+                
+                // Afficher les résultats
+                displayResults(data);
+                
+            } catch (error) {
+                console.error('❌ Erreur:', error);
+                showNotification('❌ Erreur lors de l\'analyse. Vérifiez que l\'API est lancée.', 'error');
+            } finally {
+                // Réactiver le bouton et cacher le loading
+                analyzeBtn.disabled = false;
+                loading.style.display = 'none';
+            }
+        }
+        
+        function displayResults(data) {
+            console.log('displayResults appelé avec:', data);
+            const results = document.getElementById('results');
+            
+            // Déterminer si c'est fake ou reliable
+            const isFake = data.prediction === 'Fake News';
+            
+            // Icône et couleur
+            const icon = isFake ? '🔴' : '✅';
+            const color = isFake ? 'var(--danger-color)' : 'var(--success-color)';
+            
+            // Mettre à jour l'icône
+            document.getElementById('predictionIcon').textContent = icon;
+            
+            // Mettre à jour le label
+            const predictionLabel = document.getElementById('predictionLabel');
+            predictionLabel.textContent = data.prediction;
+            predictionLabel.style.color = color;
+            
+            // Mettre à jour la confiance
+            document.getElementById('confidenceText').textContent = 
+                `Confiance : ${data.confidence}%`;
+            
+            // Mettre à jour les probabilités
+            document.getElementById('fakeProba').textContent = 
+                `${data.probabilities.fake}%`;
+            document.getElementById('reliableProba').textContent = 
+                `${data.probabilities.reliable}%`;
+            
+            // Animer les barres de progression
+            setTimeout(() => {
+                document.getElementById('fakeBar').style.width = 
+                    `${data.probabilities.fake}%`;
+                document.getElementById('reliableBar').style.width = 
+                    `${data.probabilities.reliable}%`;
+            }, 100);
+            
+            // Mettre à jour les détails
+            document.getElementById('textLength').textContent = 
+                `${data.text_length} caractères`;
+            document.getElementById('textPreview').textContent = 
+                data.text_preview;
+            
+            // Afficher les résultats avec animation
+            results.style.display = 'block';
+            results.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            
+            // Notification de succès
+            const message = isFake 
+                ? '🔴 Fake News détecté !' 
+                : '✅ Article fiable détecté !';
+            showNotification(message, isFake ? 'warning' : 'success');
+        }
+        
+        function showNotification(message, type = 'info') {
+            console.log('Notification:', message, type);
+            
+            // Créer la notification
+            const notification = document.createElement('div');
+            notification.className = `notification notification-${type}`;
+            notification.textContent = message;
+            
+            // Styles inline pour la notification
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                padding: 15px 25px;
+                border-radius: 8px;
+                color: white;
+                font-weight: 600;
+                z-index: 1000;
+                animation: slideIn 0.3s ease-out;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+                max-width: 400px;
+            `;
+            
+            // Couleurs selon le type
+            const colors = {
+                success: '#10b981',
+                error: '#ef4444',
+                warning: '#f59e0b',
+                info: '#2563eb'
+            };
+            
+            notification.style.background = colors[type] || colors.info;
+            
+            // Ajouter au body
+            document.body.appendChild(notification);
+            
+            // Supprimer après 4 secondes
+            setTimeout(() => {
+                notification.style.animation = 'slideOut 0.3s ease-out';
+                setTimeout(() => notification.remove(), 300);
+            }, 4000);
+        }
+        
+        /* ============================================================
+           EVENT LISTENERS
+           ============================================================ */
+        
+        // Permettre d'envoyer avec Ctrl+Enter
+        document.getElementById('articleText').addEventListener('keydown', function(e) {
+            if (e.ctrlKey && e.key === 'Enter') {
+                console.log('Ctrl+Enter détecté');
+                analyzeArticle();
+            }
+        });
+        
+        // Vérifier que l'API est accessible au chargement
+        window.addEventListener('load', async function() {
+            console.log('Page chargée, vérification de l\'API...');
+            try {
+                const response = await fetch('http://localhost:5000/health');
+                if (response.ok) {
+                    console.log('✅ API connectée');
+                    showNotification('✅ API connectée et prête !', 'success');
+                } else {
+                    console.log('⚠️ API répond mais avec erreur');
+                    showNotification('⚠️ API accessible mais problème de réponse', 'warning');
+                }
+            } catch (error) {
+                console.log('❌ API non accessible:', error);
+                showNotification('⚠️ API non accessible. Assurez-vous qu\'elle est lancée.', 'warning');
+            }
+        });
+        
+        console.log('✅ Toutes les fonctions sont définies et prêtes !');
+    </script>
+</body>
+</html>
+```
+
+**Sauvegardez (Ctrl+S)**
+
+---
+
+## 🎬 TESTER
+
+1. **Double-cliquez sur `index_complet.html`**
+2. **Ça s'ouvre dans le navigateur**
+3. **Appuyez sur F12 (Console)**
+4. **Vous devez voir :**
+```
+   ✅ JavaScript chargé !
+   Page chargée, vérification de l'API...
+   ✅ API connectée
+   ✅ Toutes les fonctions sont définies et prêtes !

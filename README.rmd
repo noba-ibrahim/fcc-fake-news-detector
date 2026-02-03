@@ -1,0 +1,567 @@
+# 🛡️ FCC Fake News Detector
+
+> **Détection automatique de fake news avec Machine Learning**  
+> Projet académique pour la Federal Communications Commission (FCC)
+
+[![Python](https://img.shields.io/badge/Python-3.11-blue.svg)](https://www.python.org/)
+[![Flask](https://img.shields.io/badge/Flask-3.0.0-green.svg)](https://flask.palletsprojects.com/)
+[![scikit-learn](https://img.shields.io/badge/scikit--learn-1.5.2-orange.svg)](https://scikit-learn.org/)
+[![License](https://img.shields.io/badge/License-Academic-yellow.svg)](LICENSE)
+
+---
+
+## 📋 Table des matières
+
+- [À propos](#à-propos)
+- [Démo](#démo)
+- [Fonctionnalités](#fonctionnalités)
+- [Architecture](#architecture)
+- [Installation](#installation)
+- [Utilisation](#utilisation)
+- [API Documentation](#api-documentation)
+- [Performances](#performances)
+- [Technologies](#technologies)
+- [Structure du projet](#structure-du-projet)
+- [Auteur](#auteur)
+
+---
+
+## 🎯 À propos
+
+Ce projet utilise le **Machine Learning** pour détecter automatiquement les **fake news** dans les articles de presse. 
+
+Le modèle est basé sur **Logistic Regression** avec vectorisation **TF-IDF** et atteint une précision de **98.34%** sur les données de test.
+
+### 🎓 Contexte
+
+Projet développé dans le cadre d'une mission pour la **Federal Communications Commission (FCC)**, l'autorité de régulation des télécommunications aux États-Unis.
+
+**Objectif :** Construire un système capable de distinguer les articles authentiques des fake news pour aider à la régulation du contenu médiatique.
+
+---
+
+## 🎥 Démo
+
+🔗 **Application en ligne :** [https://votre-app.vercel.app](https://votre-app.vercel.app)
+
+### Captures d'écran
+
+**Interface principale :**
+![Interface](docs/screenshots/interface.png)
+
+**Résultats d'analyse :**
+![Résultats](docs/screenshots/results.png)
+
+---
+
+## ✨ Fonctionnalités
+
+- ✅ **Détection en temps réel** de fake news
+- ✅ **Score de confiance** pour chaque prédiction
+- ✅ **API REST** complète et documentée
+- ✅ **Interface web** moderne et responsive
+- ✅ **Exemples prédéfinis** pour tester rapidement
+- ✅ **Visualisation** des probabilités avec barres animées
+- ✅ **Performance élevée** : 98.34% de précision
+
+---
+
+## 🏗️ Architecture
+```
+┌─────────────────┐
+│   Frontend      │  Interface utilisateur (HTML/CSS/JS)
+│   (Web UI)      │  → Envoie le texte à analyser
+└────────┬────────┘
+         │ HTTP POST
+         ↓
+┌─────────────────┐
+│   API Flask     │  Serveur REST
+│   (Backend)     │  → Reçoit le texte
+└────────┬────────┘
+         │ Transform
+         ↓
+┌─────────────────┐
+│  TF-IDF         │  Vectorisation du texte
+│  Vectorizer     │  → 5000 features
+└────────┬────────┘
+         │ Predict
+         ↓
+┌─────────────────┐
+│  Logistic       │  Modèle de classification
+│  Regression     │  → Fake (0) ou Reliable (1)
+└────────┬────────┘
+         │ Result
+         ↓
+┌─────────────────┐
+│   Response      │  JSON avec prédiction + confiance
+│   (JSON)        │  → Affiché dans l'interface
+└─────────────────┘
+```
+
+---
+
+## 🚀 Installation
+
+### Prérequis
+
+- Python 3.8 ou supérieur
+- pip (gestionnaire de paquets Python)
+- Git
+
+### Étape 1 : Cloner le repository
+```bash
+git clone https://github.com/votre-username/fcc-fake-news-api.git
+cd fcc-fake-news-api
+```
+
+### Étape 2 : Créer un environnement virtuel (recommandé)
+
+**Avec Anaconda :**
+```bash
+conda create -n fcc-api python=3.11
+conda activate fcc-api
+```
+
+**Avec venv :**
+```bash
+python -m venv venv
+source venv/bin/activate  # Linux/Mac
+venv\Scripts\activate     # Windows
+```
+
+### Étape 3 : Installer les dépendances
+```bash
+pip install -r requirements.txt
+```
+
+### Étape 4 : Vérifier les modèles
+
+Assurez-vous que les fichiers suivants existent dans `models/` :
+- `fake_news_model.pkl` (Modèle Logistic Regression)
+- `tfidf_vectorizer.pkl` (Vectorizer TF-IDF)
+
+---
+
+## 💻 Utilisation
+
+### Lancer l'API
+```bash
+cd api
+python app.py
+```
+
+L'API sera accessible sur : `http://localhost:5000`
+
+### Lancer l'interface web
+
+**Option 1 : Serveur Python**
+```bash
+cd frontend
+python -m http.server 8000
+```
+
+Puis ouvrez : `http://localhost:8000/index_complet.html`
+
+**Option 2 : Double-clic**
+- Ouvrez directement `frontend/index_complet.html` dans votre navigateur
+
+### Tester l'API avec Python
+```python
+import requests
+
+url = "http://localhost:5000/predict"
+data = {
+    "text": "Breaking news: Scientists discover new breakthrough"
+}
+
+response = requests.post(url, json=data)
+result = response.json()
+
+print(f"Prédiction: {result['prediction']}")
+print(f"Confiance: {result['confidence']}%")
+```
+
+### Tester l'API avec cURL
+```bash
+curl -X POST http://localhost:5000/predict \
+  -H "Content-Type: application/json" \
+  -d '{"text":"Your article text here"}'
+```
+
+---
+
+## 📚 API Documentation
+
+### Base URL
+```
+http://localhost:5000
+```
+
+### Endpoints
+
+#### 1. Health Check
+```http
+GET /health
+```
+
+**Réponse :**
+```json
+{
+  "status": "ok",
+  "model_loaded": true,
+  "message": "FCC Fake News Detector API is running"
+}
+```
+
+#### 2. Predict News Authenticity
+```http
+POST /predict
+Content-Type: application/json
+```
+
+**Request Body :**
+```json
+{
+  "text": "Article text to analyze..."
+}
+```
+
+**Response :**
+```json
+{
+  "prediction": "Fake News",
+  "prediction_code": 0,
+  "confidence": 97.53,
+  "probabilities": {
+    "fake": 97.53,
+    "reliable": 2.47
+  },
+  "text_length": 150,
+  "text_preview": "Article text to..."
+}
+```
+
+**Status Codes :**
+- `200 OK` - Prédiction réussie
+- `400 Bad Request` - Texte manquant ou invalide
+- `500 Internal Server Error` - Erreur du serveur
+
+#### 3. API Documentation
+```http
+GET /
+```
+
+Retourne la documentation JSON de l'API.
+
+---
+
+## 📊 Performances
+
+### Métriques du modèle
+
+| Métrique | Score | Description |
+|----------|-------|-------------|
+| **Accuracy** | 98.34% | Taux de prédictions correctes |
+| **Precision** | 98.34% | Fiabilité des prédictions positives |
+| **Recall** | 98.34% | Taux de détection des vrais positifs |
+| **F1-Score** | 98.34% | Moyenne harmonique précision/recall |
+
+### Dataset
+
+- **Articles d'entraînement :** 24,728
+- **Articles de test :** 7,728
+- **Total :** 32,456 articles
+- **Classes :** 
+  - 0 = Fake News
+  - 1 = Reliable News
+
+### Temps de réponse
+
+- **Chargement du modèle :** ~2 secondes (au démarrage)
+- **Prédiction :** < 100ms par article
+- **Vectorisation TF-IDF :** < 50ms
+
+---
+
+## 🛠️ Technologies
+
+### Backend
+- **Python 3.11** - Langage principal
+- **Flask 3.0.0** - Framework web
+- **Flask-CORS 4.0.0** - Gestion CORS
+
+### Machine Learning
+- **scikit-learn 1.5.2** - Bibliothèque ML
+- **TF-IDF Vectorizer** - Feature extraction
+  - Max features: 5000
+  - N-grams: (1, 2)
+- **Logistic Regression** - Modèle de classification
+  - Non optimisé (paramètres par défaut)
+  - max_iter: 1000
+  - random_state: 42
+
+### Frontend
+- **HTML5/CSS3** - Structure et design
+- **JavaScript (Vanilla)** - Logique et interactions
+- **Fetch API** - Appels API asynchrones
+
+### Data Processing
+- **pandas 2.0.3** - Manipulation de données
+- **numpy 1.24.3** - Calculs numériques
+
+---
+
+## 📁 Structure du projet
+```
+fcc-fake-news-api/
+│
+├── 📂 models/                      # Modèles ML sauvegardés
+│   ├── fake_news_model.pkl        # Modèle Logistic Regression
+│   ├── tfidf_vectorizer.pkl       # Vectorizer TF-IDF
+│   └── README.md                  # Info sur les modèles
+│
+├── 📂 api/                         # API Flask
+│   ├── app.py                     # Application principale
+│   ├── config.py                  # Configuration
+│   └── requirements.txt           # Dépendances API
+│
+├── 📂 frontend/                    # Interface web
+│   ├── index_complet.html         # Page principale (tout-en-un)
+│   ├── index.html                 # Page principale (modulaire)
+│   ├── style.css                  # Styles CSS
+│   └── script.js                  # JavaScript
+│
+├── 📂 tests/                       # Tests
+│   ├── test_api.py                # Tests unitaires
+│   └── test_quick.py              # Tests rapides
+│
+├── 📂 notebooks/                   # Notebooks Jupyter
+│   └── models.ipynb               # Notebook d'entraînement
+│
+├── 📂 docs/                        # Documentation
+│   ├── API_DOCUMENTATION.md       # Doc API détaillée
+│   └── USAGE_GUIDE.md            # Guide d'utilisation
+│
+├── 📄 README.md                    # Ce fichier
+├── 📄 requirements.txt             # Dépendances globales
+├── 📄 .gitignore                  # Fichiers ignorés par Git
+└── 📄 LICENSE                     # Licence du projet
+```
+
+---
+
+## 🧪 Tests
+
+### Lancer les tests unitaires
+```bash
+# Tests de l'API
+python tests/test_api.py
+
+# Tests rapides
+python tests/test_quick.py
+```
+
+### Tests manuels
+```bash
+# Test avec bash
+bash tests/test_manual.sh
+```
+
+---
+
+## 🚀 Déploiement
+
+### Déployer sur Render
+
+1. Créer un compte sur [Render.com](https://render.com)
+2. Connecter votre repository GitHub
+3. Créer un nouveau "Web Service"
+4. Sélectionner le repository
+5. Configurer :
+   - Build Command: `pip install -r requirements.txt`
+   - Start Command: `cd api && python app.py`
+6. Déployer !
+
+### Variables d'environnement
+
+Aucune variable d'environnement n'est nécessaire pour ce projet.
+
+---
+
+## 📝 Guide de développement
+
+### Ajouter un nouveau endpoint
+```python
+@app.route('/nouveau', methods=['POST'])
+def nouveau_endpoint():
+    data = request.get_json()
+    # Votre logique ici
+    return jsonify({'result': 'success'})
+```
+
+### Améliorer le modèle
+
+1. Modifier le notebook `notebooks/models.ipynb`
+2. Ré-entraîner le modèle
+3. Sauvegarder les nouveaux fichiers .pkl
+4. Copier dans `models/`
+5. Redémarrer l'API
+
+---
+
+## 🤝 Contribution
+
+Ce projet est un projet académique. Les contributions ne sont pas acceptées actuellement.
+
+---
+
+## 📄 Licence
+
+Ce projet est développé dans le cadre d'un projet académique pour la FCC.
+
+Tous droits réservés © 2024
+
+---
+
+## 👤 Auteur
+
+**[Votre Nom]**
+
+- 🎓 Étudiant en Data Science / Machine Learning
+- 📧 Email: votre.email@example.com
+- 💼 LinkedIn: [Votre Profil](https://linkedin.com/in/votre-profil)
+- 🐱 GitHub: [@votre-username](https://github.com/votre-username)
+
+---
+
+## 🙏 Remerciements
+
+- **Federal Communications Commission (FCC)** pour le contexte du projet
+- **scikit-learn** pour les outils de Machine Learning
+- **Flask** pour le framework web
+- **Communauté open-source** pour les ressources et la documentation
+
+---
+
+## 📞 Support
+
+Pour toute question ou problème :
+
+1. **Ouvrir une issue** sur GitHub
+2. **Consulter la documentation** dans `docs/`
+3. **Contacter l'auteur** par email
+
+---
+
+## ⭐ Si ce projet vous a aidé
+
+N'hésitez pas à lui donner une étoile sur GitHub ! ⭐
+
+---
+
+**Fait avec ❤️ pour la détection des fake news et la protection de l'information**
+```
+
+**Sauvegardez (Ctrl+S)**
+
+---
+
+## 📝 FICHIERS SUPPLÉMENTAIRES À CRÉER
+
+Maintenant créons les autres fichiers nécessaires !
+
+---
+
+### **1. .gitignore**
+
+**Créez le fichier `.gitignore` à la racine du projet :**
+```
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# Environment
+.env
+.venv
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Models (optionnel - commentez si vous voulez versionner les modèles)
+# models/*.pkl
+
+# Data
+data/raw/
+data/processed/*.csv
+
+# Test coverage
+htmlcov/
+.coverage
+.pytest_cache/
+```
+
+---
+
+### **2. runtime.txt** (pour Render/Heroku)
+
+**Créez `runtime.txt` à la racine :**
+```
+python-3.11.0
+```
+
+---
+
+### **3. Procfile** (pour Render/Heroku)
+
+**Créez `Procfile` à la racine (sans extension) :**
+```
+web: cd api && python app.py
+```
+
+---
+
+### **4. requirements.txt** (mise à jour globale)
+
+**Remplacez le contenu de `requirements.txt` à la racine :**
+```
+flask==3.0.0
+flask-cors==4.0.0
+scikit-learn>=1.3.2
+numpy>=1.24.3
+pandas>=2.0.3
+requests==2.31.0
+gunicorn==21.2.0
