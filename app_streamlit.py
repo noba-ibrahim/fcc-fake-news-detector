@@ -37,9 +37,10 @@ st.markdown("""
 def load_models():
     """Charge le modèle et le vectorizer"""
     try:
-        # Chemins des modèles
-        model_path = Path('models/fake_news_model.pkl')
-        vectorizer_path = Path('models/tfidf_vectorizer.pkl')
+        # Chemins absolus des modèles basés sur l'emplacement du script
+        base_dir = os.path.dirname(os.path.abspath(__file__))
+        model_path = os.path.join(base_dir, 'models', 'fake_news_model.pkl')
+        vectorizer_path = os.path.join(base_dir, 'models', 'tfidf_vectorizer.pkl')
         
         # Charger le modèle
         with open(model_path, 'rb') as f:
